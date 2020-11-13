@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect,useState } from 'react';
-import { StyleSheet, DrawerLayoutAndroid, Button, Text, TextInput, View, FlatList, Alert } from 'react-native';
+import { StyleSheet, DrawerLayoutAndroid, Image, Button, Text, TextInput, View, FlatList, Alert } from 'react-native';
 import { NativeRouter, Route, Link, Switch, Redirect, useHistory, useRouteMatch } from 'react-router-native';
+
 
 const styles = StyleSheet.create({
   item: {
@@ -33,8 +34,16 @@ const styles = StyleSheet.create({
   },
   button_b: {
     backgroundColor: '#14b383',
+  },
+  tinyLogo: {
+    width: 75,
+    height: 75,
   }
 });
+
+const magicKey = (itemId) => {
+  return `${itemId}${Math.floor(Math.random() * 10000).toString()}`;   
+}
 
 const ItemSeparator = () => <View style={styles.separator} >
 </View>;
@@ -61,17 +70,22 @@ const Detalles = (props) => {
   const renderDetalle = (props) => {
     //console.log("DETALLES", props)
 
-    return(<View style={styles.detalle}>
-    <Text>Producto: {props.item.Producto.descripcion}</Text>
-    <Text>Cantidad: {props.item.cantidad}</Text>
-    </View>)
+    if(props.item.Producto){
+      return(<View style={styles.detalle}>
+      <Text>Producto: {props.item.Producto.descripcion}</Text>
+      <Text>Cantidad: {props.item.cantidad}</Text>
+      </View>)
+    } else {
+      return(<View style={styles.detalle}>
+        </View>)
+    }
   }
 
   return (
     <FlatList
         data={props.DetallePedidos}
         renderItem={renderDetalle}
-        keyExtractor={item => item.id}
+        keyExtractor={item => magicKey(item.id)}
         ItemSeparatorComponent={ItemSeparator}
         // other props
       />
@@ -172,8 +186,29 @@ const PedidosList = (props) => {
     //console.log("renderPedido", props)
     return(<View style={styles.item}>
       
-      <Text>Pedido de {props.item.Cliente.nombre}</Text>
-      <Text>TOTAL: ${props.item.Pedido.total}</Text>
+      
+      <Text
+        style={{
+          fontWeight: 'bold',
+          fontSize: 20,
+        }}
+      >Pedido de {props.item.Cliente.nombre}</Text>
+      
+      <Text
+        style={{
+          fontWeight: 'bold',
+          fontSize: 15,
+        }}
+      
+      >{props.item.Pedido.fecha.split("T")[0]}</Text>
+      
+      <Text
+        style={{
+          fontWeight: 'bold',
+          fontSize: 15,
+        }}
+      
+      >TOTAL: ${props.item.Pedido.total.toFixed(2)}</Text>
       <Detalles DetallePedidos={props.item.Pedido.DetallePedidos}/>
         <Button
           color="#14b383"
@@ -228,7 +263,7 @@ const PedidosList = (props) => {
           data={pedidosFiltered}
           renderItem={renderPedido}
           ItemSeparatorComponent={ItemSeparator}
-          keyExtractor={item => item.id}
+          keyExtractor={item => magicKey(item.id)}
         />
         </View>
         </View>
@@ -267,6 +302,7 @@ const ProductoConsulta = () => {
  
      //console.log("producto", json.data)
      setProductos(json.data)
+     setFilteredProductos(json.data)
      setLoading(false)
   } 
   
@@ -276,62 +312,97 @@ const ProductoConsulta = () => {
 
    const renderProducto = (props) =>{
     
-    return(<View style={styles.item}>
-      <Text>Producto {props.item.descripcion}</Text>
-      <Text>Precio: ${props.item.precio}</Text>
-      <Text>Stock: {props.item.stock}</Text>
-      
-    </View>)
-  }
+      if(props.item){
+        
+        return(
+        <View style={{
+          backgroundColor: '#82f5de',
+          padding: 30,
+          flexDirection: 'row',
+          flex: 1      
+        }}>
+           <View style={{flex:1}}>
+          <Image
+            style={{
+              width: 75,
+              height: 75,
+            }}
+            source={{
+              uri: props.item.foto,
+            }}
+          /></View>
+          <View style={ { flexDirection: 'column' }}>
+            
+            <Text
+              style={{
+                fontWeight: 'bold',
+                fontSize: 25,
+                flex:1
+              }}
+            >{props.item.descripcion}</Text>
+            <Text>Precio: ${props.item.precio.toFixed(2)}</Text>
+            <Text>Stock: {props.item.stock}</Text>
+          </View>
+        </View>)
+      } else {
+        return(<View style={styles.item}>error</View>)
 
+      }
+    }
   if(!loading){
-
-    return (
-      <View style={{flex:1}}>
+    if(productos){
+        return (
           <View style={{flex:1}}>
-         <TextInput
-            style={{ height: 30, borderColor: 'gray', borderWidth: 1 }}
-            onChangeText={text => {
+              <View style={{flex:1}}>
+            <TextInput
+                style={{ height: 30, borderColor: 'gray', borderWidth: 1 }}
+                onChangeText={text => {
+                  
+                  setBusqueda(text)
+                }}
+                value={busqueda}
+              />
+
+              <Button
+                color="#14b383"
+                onPress={() => {
+                    const filt = (producto) => {
+                      return producto.descripcion.includes(busqueda) ||
+                      producto.codigo.includes(busqueda);
+                    }
+                    setFilteredProductos(productos.filter(filt))
+
+                }}
+                title="Buscar"
+              ></Button>
               
-              setBusqueda(text)
-            }}
-            value={busqueda}
-          />
 
-          <Button
-            color="#14b383"
-            onPress={() => {
-                const filt = (producto) => {
-                  return producto.descripcion.includes(busqueda);
-                }
-                setFilteredProductos(productos.filter(filt))
+            </View>
 
-            }}
-            title="Buscar"
-          ></Button>
-          
-
-        </View>
-
-        <View style={{flex:5}}>
-          <FlatList
-            data={filteredProductos}
-            renderItem={renderProducto}
-            ItemSeparatorComponent={ItemSeparator}
-            keyExtractor={item => item.id}
-          />
-        </View>
+            <View style={{flex:5}}>
+              <FlatList
+                data={filteredProductos}
+                renderItem={renderProducto}
+                ItemSeparatorComponent={ItemSeparator}
+                keyExtractor={item => magicKey(item.id)}
+              />
+            </View>
+          </View>
+        )
+        
+    } else {
+      <View>
+        <Text>Error</Text>
       </View>
-    )
-    
+    }
   }else{
     return (
       <View>
-      <Text>Cargando...</Text>
+        <Text>Cargando...</Text>
       </View>
     )
     
-  }
+  } 
 }
 
 const Menu = () =>{
