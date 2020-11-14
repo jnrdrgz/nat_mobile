@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect,useState } from 'react';
-import { StyleSheet, DrawerLayoutAndroid, Image, Button, Text, TextInput, View, FlatList, Alert } from 'react-native';
+import { StyleSheet, Card, DrawerLayoutAndroid, Image, Button, Text, TextInput, View, FlatList, Alert } from 'react-native';
 import { NativeRouter, Route, Link, Switch, Redirect, useHistory, useRouteMatch } from 'react-router-native';
 
 
@@ -99,6 +99,13 @@ const PedidosList = (props) => {
   const [loading, setLoading]  = useState(true);
   const fetchPedidos = async () => {
      //  192.168.1.12
+
+     
+     const test = await fetch('https://jnrdrgz.github.io/nt.json');
+     const test_json_ip = await test.json();
+     console.log("test", test_json_ip) 
+
+
      const response = await fetch('http://192.168.1.12:3001/pedidos/cliente');
      const json = await response.json();
  
@@ -319,30 +326,31 @@ const ProductoConsulta = () => {
           backgroundColor: '#82f5de',
           padding: 30,
           flexDirection: 'row',
-          flex: 1      
         }}>
-           <View style={{flex:1}}>
-          <Image
-            style={{
-              width: 75,
-              height: 75,
-            }}
-            source={{
-              uri: props.item.foto,
-            }}
-          /></View>
-          <View style={ { flexDirection: 'column' }}>
-            
-            <Text
+          <View style={{flex:1}}>
+            <Image
               style={{
-                fontWeight: 'bold',
-                fontSize: 25,
-                flex:1
+                width: 75,
+                height: 75,
               }}
-            >{props.item.descripcion}</Text>
-            <Text>Precio: ${props.item.precio.toFixed(2)}</Text>
-            <Text>Stock: {props.item.stock}</Text>
+              source={{
+                uri: props.item.foto,
+              }}
+            />
           </View>
+            <View >
+              <View style={ { flexDirection: 'column' }}>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: 17,
+                  }}
+                >{props.item.descripcion}</Text>
+                <Text>Precio: ${props.item.precio.toFixed(2)}</Text>
+                <Text>Stock: {props.item.stock}</Text>
+              </View>
+            </View>
+          
         </View>)
       } else {
         return(<View style={styles.item}>error</View>)
