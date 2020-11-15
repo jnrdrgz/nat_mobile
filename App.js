@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect,useState } from 'react';
-import { StyleSheet, Card, DrawerLayoutAndroid, Image, Button, Text, TextInput, View, FlatList, Alert } from 'react-native';
+import { StyleSheet, DrawerLayoutAndroid, Image, Button, Text, TextInput, View, FlatList, Alert } from 'react-native';
 import { NativeRouter, Route, Link, Switch, Redirect, useHistory, useRouteMatch } from 'react-router-native';
 
 
@@ -67,6 +67,7 @@ const TestCompButtons = () => {
 }
 
 const Detalles = (props) => {
+  
   const renderDetalle = (props) => {
     //console.log("DETALLES", props)
 
@@ -81,16 +82,39 @@ const Detalles = (props) => {
     }
   }
 
+  if(props.VerDetalles){
+    return (
+      <View>
+          
+      <FlatList
+          data={props.DetallePedidos}
+          renderItem={renderDetalle}
+          keyExtractor={item => magicKey(item.id)}
+          ItemSeparatorComponent={ItemSeparator}
+          // other props
+        />
+        </View>
+      
+    )
+  } else {
+    return (<View></View>)
+  }
+ }
+
+ const DetallesWrapper = (props) => {
+  const [verDetalles, setVerDetalles]  = useState(false);
+
   return (
-    <FlatList
-        data={props.DetallePedidos}
-        renderItem={renderDetalle}
-        keyExtractor={item => magicKey(item.id)}
-        ItemSeparatorComponent={ItemSeparator}
-        // other props
-      />
-  )
-}
+    <View>
+      <Button
+          color="#14b383"
+          onPress={() => {setVerDetalles(!verDetalles)}}
+          title="Ver Detalles"
+      ></Button>
+  <Detalles DetallePedidos={props.DetallePedidos} VerDetalles={verDetalles}/>
+        </View>
+    )
+ }
 const PedidosList = (props) => {
 
   const [_pedidos, setPedidos] = useState([]);
@@ -101,9 +125,9 @@ const PedidosList = (props) => {
      //  192.168.1.12
 
      
-     const test = await fetch('https://jnrdrgz.github.io/nt.json');
-     const test_json_ip = await test.json();
-     console.log("test", test_json_ip) 
+     //const test = await fetch('https://jnrdrgz.github.io/nt.json');
+     //const test_json_ip = await test.json();
+     //console.log("test", test_json_ip) 
 
 
      const response = await fetch('http://192.168.1.12:3001/pedidos/cliente');
@@ -216,7 +240,8 @@ const PedidosList = (props) => {
         }}
       
       >TOTAL: ${props.item.Pedido.total.toFixed(2)}</Text>
-      <Detalles DetallePedidos={props.item.Pedido.DetallePedidos}/>
+  <DetallesWrapper DetallePedidos={props.item.Pedido.DetallePedidos}/>
+        
         <Button
           color="#14b383"
           onPress={() => {marcarPedidoEntregadoPagadp(props.item.id, "pagado")}}
@@ -236,19 +261,24 @@ const PedidosList = (props) => {
   if(!loading){
 
       return (
-        <View style={{flex:1}}>
+        <View style={{
+          flex:1,
+          alignSelf: 'stretch',
+          textAlign: 'center',
+
+          }}>
           <View style={{flex:1}}>
+          
           <TextInput
             style={{ height: 30, borderColor: 'gray', borderWidth: 1 }}
             onChangeText={text => 
               {
-
                 setBusqueda(text)
-               
 
               }}
             value={busqueda}
-          />
+            />
+
           <Button
             color="#14b383"
             onPress={() => {
@@ -322,23 +352,25 @@ const ProductoConsulta = () => {
       if(props.item){
         
         return(
-        <View style={{
-          backgroundColor: '#82f5de',
-          padding: 30,
-          flexDirection: 'row',
-        }}>
-          <View style={{flex:1}}>
-            <Image
-              style={{
-                width: 75,
-                height: 75,
-              }}
-              source={{
-                uri: props.item.foto,
-              }}
-            />
-          </View>
-            <View >
+          <View style={ {
+            flexDirection: "column",
+            
+          }}>
+
+            <View style={[{flexDirection: "row"}]}>
+        
+              <View style={{ flex: 2,  }}>
+              <Image
+                style={{
+                  width: "100%",
+                  height: 125,
+                }}
+                source={{
+                  uri: props.item.foto,
+                }}
+              />
+              </View>
+              <View style={{ flex: 4, backgroundColor: "#82f5de" }} >
               <View style={ { flexDirection: 'column' }}>
                 <Text
                   style={{
@@ -349,9 +381,11 @@ const ProductoConsulta = () => {
                 <Text>Precio: ${props.item.precio.toFixed(2)}</Text>
                 <Text>Stock: {props.item.stock}</Text>
               </View>
+              </View>
+
             </View>
-          
-        </View>)
+          </View>
+        )
       } else {
         return(<View style={styles.item}>error</View>)
 
@@ -360,7 +394,12 @@ const ProductoConsulta = () => {
   if(!loading){
     if(productos){
         return (
-          <View style={{flex:1}}>
+          <View style={{
+            flex:1,
+            alignSelf: 'stretch',
+            textAlign: 'center',
+      
+            }}>
               <View style={{flex:1}}>
             <TextInput
                 style={{ height: 30, borderColor: 'gray', borderWidth: 1 }}
@@ -375,8 +414,9 @@ const ProductoConsulta = () => {
                 color="#14b383"
                 onPress={() => {
                     const filt = (producto) => {
-                      return producto.descripcion.includes(busqueda) ||
-                      producto.codigo.includes(busqueda);
+                      console.log(producto)
+                      return producto.descripcion.toLowerCase().includes(busqueda) ||
+                      producto.codigo.toString().includes(busqueda);
                     }
                     setFilteredProductos(productos.filter(filt))
 
@@ -387,7 +427,7 @@ const ProductoConsulta = () => {
 
             </View>
 
-            <View style={{flex:5}}>
+            <View style={{flex:5,backgroundColor: "#14b383"}}>
               <FlatList
                 data={filteredProductos}
                 renderItem={renderProducto}
@@ -431,7 +471,10 @@ const Menu = () =>{
  }
   return (
     
-    <View style={{flex: 1}}>
+    <View style={{
+      flex: 1,
+            
+      }}>
       <Text style={{flex: 1}}>
         TITULO
       </Text>
