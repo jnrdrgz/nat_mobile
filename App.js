@@ -283,7 +283,7 @@ const PedidosList = (props) => {
             color="#14b383"
             onPress={() => {
                 const filt = (pedido) => {
-                  return pedido.Cliente.nombre.includes(busqueda);
+                  return pedido.Cliente.nombre.toLowerCase().includes(busqueda.toLowerCase());
                 }
                 setPedidosFiltered(_pedidos.filter(filt))
 
@@ -369,6 +369,8 @@ const ProductoConsulta = () => {
                   uri: props.item.foto,
                 }}
               />
+
+              
               </View>
               <View style={{ flex: 4, backgroundColor: "#82f5de" }} >
               <View style={ { flexDirection: 'column' }}>
@@ -415,7 +417,7 @@ const ProductoConsulta = () => {
                 onPress={() => {
                     const filt = (producto) => {
                       console.log(producto)
-                      return producto.descripcion.toLowerCase().includes(busqueda) ||
+                      return producto.descripcion.toLowerCase().includes(busqueda.toLowerCase()) ||
                       producto.codigo.toString().includes(busqueda);
                     }
                     setFilteredProductos(productos.filter(filt))
@@ -525,8 +527,35 @@ const Main = (props) => {
   }
 
   const navigationView = (
-    <View style={styles.navigationContainer}>
-      <Text style={{ margin: 10, fontSize: 15 }}>App</Text>
+    <View style={[styles.navigationContainer]}>
+      <View style={ {
+            flexDirection: "column",
+            
+          }}>
+            <View style={ {
+            flex: 1,
+            padding: 10
+            
+          }}>
+        <Image
+          style={{
+            width: 30,
+            height: 30
+          }}
+          source={{
+            uri: "https://res.cloudinary.com/dy5tuirk1/image/upload/v1605674117/f7iscqz2g6dnq95juwpp.png",
+          }}
+        />
+        </View>
+
+        <View style={ {
+            
+          }}>
+
+        <Text style={{  fontSize: 20 }}>          NAT App</Text>
+        </View>
+      </View>
+      
       <Button  color="#14b383" onPress={goToPedidosClick} title="Pedidos"></Button>
       <Button  color="#14b383" onPress={() => {
         goToProductosClick()
